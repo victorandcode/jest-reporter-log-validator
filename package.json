@@ -1,0 +1,29 @@
+{
+  "name": "jest-reporter-log-validator",
+  "version": "0.1.0",
+  "description": "Jest reporter to validate log messages produced by tests",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "jest src/",
+    "test:watch": "jest src/ --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/victorandcode/jest-reporter-log-validator.git"
+  },
+  "keywords": [
+    "jest",
+    "unit-test",
+    "reporter",
+    "logging"
+  ],
+  "author": "Victor Cordova",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/victorandcode/jest-reporter-log-validator/issues"
+  },
+  "homepage": "https://github.com/victorandcode/jest-reporter-log-validator#readme",
+  "devDependencies": {
+    "jest": "^26.6.3"
+  }
+}
