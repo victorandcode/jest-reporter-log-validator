@@ -5,7 +5,7 @@ exports[`validateLogs fails if "failIfUnknownLogsFound" is set to true and unkno
 - Warning: React.createFactory() is deprecated and will be removed in a future major release. Consider using JSX or use React.createElement() directly instead."
 `;
 
-exports[`validateLogs fails if failIfLogRestrictionsOutdated is set to true and log max has decrased 1`] = `
+exports[`validateLogs fails if failIfLogValidationsOutdated is set to true and log max has decrased 1`] = `
 "You must lower the number of allowed log messages matching certain patterns. Please adjust your config file according to the following:
 - For pattern(s) \\"Each child in a list should have a unique\\", the maximum allowed is 2 but it should be 1"
 `;

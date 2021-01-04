@@ -9,7 +9,7 @@ function getCallsToConsoleFn(consoleMockObj) {
 }
 
 const baseConfig = {
-  "logsWithValidations": [
+  "logValidations": [
     {
       "patterns": [
         "Each child in a list should have a unique"
@@ -23,9 +23,9 @@ const baseConfig = {
       "max": 1
     }
   ],
-  "logsWithoutLimit": [],
+  "failIfLogValidationsOutdated": false,
   "failIfUnknownLogsFound": false,
-  "failIfLogRestrictionsOutdated": false
+  "exemptLogs": [],
 }
 
 beforeEach(() => {
@@ -62,10 +62,10 @@ describe("validateLogs", () => {
     expect(() => validateLogs(logs)).toThrow(new Error("File not found"))
   })
 
-  it("fails if failIfLogRestrictionsOutdated is set to true and log max has decrased", () => {
+  it("fails if failIfLogValidationsOutdated is set to true and log max has decrased", () => {
     const config = {
       ...baseConfig,
-      failIfLogRestrictionsOutdated: true
+      failIfLogValidationsOutdated: true
     }
     const logs = [ 
       'Warning: Each child in a list should have a unique "key" prop',
@@ -110,11 +110,11 @@ describe("validateLogs", () => {
     expect(getCallsToConsoleFn(console.log)).toMatchSnapshot()
   })
 
-  it("succeeds if \"failIfUnknownLogsFound\" is true and warning is inside \"logsWithoutLimit\"", () => {
+  it("succeeds if \"failIfUnknownLogsFound\" is true and warning is inside \"exemptLogs\"", () => {
     const config = {
       ...baseConfig,
       failIfUnknownLogsFound: true,
-      logsWithoutLimit: [
+      exemptLogs: [
         {
           "patterns": ["Error: Uncaught [TypeError: Cannot read property 'then' of undefined]"]
         }
