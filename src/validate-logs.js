@@ -4,7 +4,7 @@ const CONFIG_FILE_NAME = '.jest-logs-restrictions.json'
 
 function validateLogs(logMessages) {
   try {
-    const logsRestrictions = getLatestWarningsRestrictions()
+    const logsRestrictions = getLogMessagesRestrictions()
     const { logsWithLimit } = logsRestrictions
 
     // Check for max limit exceeded
@@ -25,9 +25,9 @@ function validateLogs(logMessages) {
     }
 
     // Validate unknown log messages
-    const { failIfUnknownWarningsFound = false } = logsRestrictions
+    const { failIfUnknownWarningsFound = false, logsWithoutLimit = [] } = logsRestrictions
     if (failIfUnknownWarningsFound) {
-      const unknownWarnings = findUnknownLogMessages(logsWithLimit, logMessages)
+      const unknownWarnings = findUnknownLogMessages(logsWithLimit, logsWithoutLimit, logMessages)
       if (unknownWarnings.length) {
         printUnknownLogMessages(unknownWarnings)
         throw new Error("Unknown warnings were found. See above for more details.")
@@ -43,7 +43,7 @@ function validateLogs(logMessages) {
 /**
  * Parse config file's content
  */
-function getLatestWarningsRestrictions() {
+function getLogMessagesRestrictions() {
   const configObj = JSON.parse(fs.readFileSync(CONFIG_FILE_NAME))
   // Validate schema
   if (typeof configObj.logsWithLimit !== "object" || configObj.logsWithLimit.length === undefined) {
@@ -109,10 +109,11 @@ function printOutdatedRestrictions(logsWithLimit, outdatedRestrictionsIndexes, c
   }
 }
 
-function findUnknownLogMessages(logsWithLimit, logMessages) {
+function findUnknownLogMessages(logsWithLimit, logsWithoutLimit, logMessages) {
   const unknownLogMessages = []
   for (const warningLine of logMessages) {
     let hasMatchingPattern = false
+    // Check if it has limit
     for (const restriction of logsWithLimit) {
       if (matchesRestriction(warningLine, restriction)) {
         hasMatchingPattern = true
@@ -120,7 +121,16 @@ function findUnknownLogMessages(logsWithLimit, logMessages) {
       }
     }
     if (!hasMatchingPattern) {
-      unknownLogMessages.push(warningLine)
+      let hasNoLimit = false
+      // Check if it's in the no limit list
+      for (const restriction of logsWithoutLimit) {
+        if (matchesRestriction(warningLine, restriction)) {
+          hasNoLimit = true
+        }
+      }
+      if (!hasNoLimit) {
+        unknownLogMessages.push(warningLine)
+      }
     }
   }
   return unknownLogMessages

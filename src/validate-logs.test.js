@@ -18,6 +18,7 @@ const validConfig = {
       "max": 1
     }
   ],
+  "logsWithoutLimit": [],
   "failIfUnknownWarningsFound": false,
   "failIfLogRestrictionsOutdated": false
 }
@@ -101,5 +102,20 @@ describe("validateLogs", () => {
     expect(() => { validateLogs(logs) }).toThrow(new Error("Unknown warnings were found. See above for more details."))
   })
 
-  it.todo("it succeed if warning without limit is found")
+  it("succeeds if \"failIfUnknownWarningsFound\" is true and warning is inside \"logsWithoutLimit\"", () => {
+    const config = {
+      ...validConfig,
+      failIfUnknownWarningsFound: true,
+      logsWithoutLimit: [
+        {
+          "patterns": ["Error: Uncaught [TypeError: Cannot read property 'then' of undefined]"]
+        }
+      ],
+    }
+    const logs = [
+      "Error: Uncaught [TypeError: Cannot read property 'then' of undefined]",
+    ]
+    fs.readFileSync.mockImplementationOnce(() => JSON.stringify(config))
+    expect(() => { validateLogs(logs) }).not.toThrow()
+  })
 })
