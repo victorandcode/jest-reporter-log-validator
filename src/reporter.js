@@ -2,13 +2,15 @@ const { validateLogs } = require('./validate-logs')
 
 class MyCustomReporter {
   constructor(globalConfig, options) {
-    // TODO: Validate globalConfig.verbose and fail if it's true
+    if (globalConfig.verbose === true) {
+      throw Error("Invalid configuration. Verbose must be false when using jest-reporter-log-validator. Otherwise, console messages won't be available to the reporter.")
+    }
     this._logMessages = []
   }
 
   onTestStart(test) { }
 
-  onTestResult(test, testResult, aggregatedResult) {
+  onTestResult(_, testResult) {
     if (testResult.console) {
       for (const logObj of testResult.console) {
         this._logMessages.push(logObj.message)
