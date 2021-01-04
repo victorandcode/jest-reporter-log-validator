@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`validateLogs fails if "failIfUnknownLogsFound" is set to true and unknown warning is found 1`] = `
-"Unknown warnings are not allowed. Please use the configuration of this reporter to validate how many times the following messages can appear:
+"Unknown log messages are not allowed. Please use the configuration of this reporter to validate how many times the following messages can appear:
 - Warning: React.createFactory() is deprecated and will be removed in a future major release. Consider using JSX or use React.createElement() directly instead."
 `;
 
