@@ -5,21 +5,21 @@ const CONFIG_FILE_NAME = '.jest-logs-restrictions.json'
 function validateLogs(logMessages) {
   try {
     const logsRestrictions = getLogMessagesRestrictions()
-    const { logsWithLimit } = logsRestrictions
+    const { logsWithValidations } = logsRestrictions
 
     // Check for max limit exceeded
-    const { failedRestrictionsIndexes, currentRestrictionsCount } = processLogs(logsWithLimit, logMessages)
+    const { failedRestrictionsIndexes, currentRestrictionsCount } = processLogs(logsWithValidations, logMessages)
     if (failedRestrictionsIndexes.size) {
-      printMaxLimitExceeded(logsWithLimit, failedRestrictionsIndexes, currentRestrictionsCount)
+      printMaxLimitExceeded(logsWithValidations, failedRestrictionsIndexes, currentRestrictionsCount)
       throw new Error("Error while validating log restrictions. See above for detailed report.")
     }
     
     // Validate outdated restrictions
     const { failIfLogRestrictionsOutdated = false } = logsRestrictions
     if (failIfLogRestrictionsOutdated) {
-      const outdatedRestrictionsIndexes = findOutdatedLogRestrictions(logsWithLimit, currentRestrictionsCount)
+      const outdatedRestrictionsIndexes = findOutdatedLogRestrictions(logsWithValidations, currentRestrictionsCount)
       if (outdatedRestrictionsIndexes.length) {
-        printOutdatedRestrictions(logsWithLimit, outdatedRestrictionsIndexes, currentRestrictionsCount)
+        printOutdatedRestrictions(logsWithValidations, outdatedRestrictionsIndexes, currentRestrictionsCount)
         throw new Error("Log restrictions are outdated. See above for detailed report.")
       }
     }
@@ -27,7 +27,7 @@ function validateLogs(logMessages) {
     // Validate unknown log messages
     const { failIfUnknownLogsFound = false, logsWithoutLimit = [] } = logsRestrictions
     if (failIfUnknownLogsFound) {
-      const unknownLogMessages = findUnknownLogMessages(logsWithLimit, logsWithoutLimit, logMessages)
+      const unknownLogMessages = findUnknownLogMessages(logsWithValidations, logsWithoutLimit, logMessages)
       if (unknownLogMessages.length) {
         printUnknownLogMessages(unknownLogMessages)
         throw new Error("Unknown log messages aren't allowed. See above for more details.")
@@ -46,18 +46,18 @@ function validateLogs(logMessages) {
 function getLogMessagesRestrictions() {
   const configObj = JSON.parse(fs.readFileSync(CONFIG_FILE_NAME))
   // Validate schema
-  if (typeof configObj.logsWithLimit !== "object" || configObj.logsWithLimit.length === undefined) {
-    throw new Error("Invalid configuration, logsWithLimit should be an array")
+  if (typeof configObj.logsWithValidations !== "object" || configObj.logsWithValidations.length === undefined) {
+    throw new Error("Invalid configuration, logsWithValidations should be an array")
   }
   return configObj
 }
 
-function processLogs(logsWithLimit, logMessages) {
+function processLogs(logsWithValidations, logMessages) {
   // This represents if there are less log messages with a certain pattern than expected
-  const currentRestrictionsCount = Array(logsWithLimit.length).fill(0)
+  const currentRestrictionsCount = Array(logsWithValidations.length).fill(0)
   const failedRestrictionsIndexes = new Set()
   for (const message of logMessages) {
-    for (const [restrictionIndex, restriction] of logsWithLimit.entries()) {
+    for (const [restrictionIndex, restriction] of logsWithValidations.entries()) {
       if (matchesRestriction(message, restriction)) {
         currentRestrictionsCount[restrictionIndex] += 1
         if (currentRestrictionsCount[restrictionIndex] > restriction.max) {
@@ -79,42 +79,42 @@ function matchesRestriction(logMessage, restriction) {
   return false
 }
 
-function printMaxLimitExceeded(logsWithLimit, failedRestrictionsIndexes, currentRestrictionsCount) {
+function printMaxLimitExceeded(logsWithValidations, failedRestrictionsIndexes, currentRestrictionsCount) {
   console.log("The following log message validations failed:")
   for (const index of failedRestrictionsIndexes) {
-    const expectedCount = logsWithLimit[index].max
+    const expectedCount = logsWithValidations[index].max
     const currentCount = currentRestrictionsCount[index]
-    const patterns = logsWithLimit[index].patterns.join(",")
+    const patterns = logsWithValidations[index].patterns.join(",")
     console.log(`- For pattern(s) "${patterns}", the expected is ${expectedCount}, actual is ${currentCount}`)
   }
 }
 
-function findOutdatedLogRestrictions(logsWithLimit, currentRestrictionsCount) {
+function findOutdatedLogRestrictions(logsWithValidations, currentRestrictionsCount) {
   const outdatedLogRestrictionsIndexes = []
-  for (const [index, logWithLimit] of logsWithLimit.entries()) {
-    if (logWithLimit.max > currentRestrictionsCount[index]) {
+  for (const [index, logWithValidations] of logsWithValidations.entries()) {
+    if (logWithValidations.max > currentRestrictionsCount[index]) {
       outdatedLogRestrictionsIndexes.push(index)
     }
   }
   return outdatedLogRestrictionsIndexes
 }
 
-function printOutdatedRestrictions(logsWithLimit, outdatedRestrictionsIndexes, currentRestrictionsCount) {
+function printOutdatedRestrictions(logsWithValidations, outdatedRestrictionsIndexes, currentRestrictionsCount) {
   console.log("You must lower the number of allowed log messages matching certain patterns. Please adjust your config file according to the following:")
   for (const index of outdatedRestrictionsIndexes) {
     const currentCount = currentRestrictionsCount[index]
-    const maximumAllowed = logsWithLimit[index].max
-    const patterns = logsWithLimit[index].patterns.join(",")
+    const maximumAllowed = logsWithValidations[index].max
+    const patterns = logsWithValidations[index].patterns.join(",")
     console.log(`- For pattern(s) "${patterns}", the maximum allowed is ${maximumAllowed} but it should be ${currentCount}`)
   }
 }
 
-function findUnknownLogMessages(logsWithLimit, logsWithoutLimit, logMessages) {
+function findUnknownLogMessages(logsWithValidations, logsWithoutLimit, logMessages) {
   const unknownLogMessages = []
   for (const message of logMessages) {
     let hasMatchingPattern = false
     // Check if it has limit
-    for (const restriction of logsWithLimit) {
+    for (const restriction of logsWithValidations) {
       if (matchesRestriction(message, restriction)) {
         hasMatchingPattern = true
         break

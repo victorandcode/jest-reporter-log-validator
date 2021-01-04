@@ -9,7 +9,7 @@ function getCallsToConsoleFn(consoleMockObj) {
 }
 
 const baseConfig = {
-  "logsWithLimit": [
+  "logsWithValidations": [
     {
       "patterns": [
         "Each child in a list should have a unique"
@@ -78,7 +78,7 @@ describe("validateLogs", () => {
 
   it.skip("throws if schema doesn't have the correct structure", () => {
     const invalidConfig = {
-      "logsWithLimit": [
+      "logsWithValidations": [
         {
           "patterns": [
             "Each child in a list should have a unique"
@@ -106,7 +106,7 @@ describe("validateLogs", () => {
       "Warning: React.createFactory() is deprecated and will be removed in a future major release. Consider using JSX or use React.createElement() directly instead.",
     ]
     fs.readFileSync.mockImplementationOnce(() => JSON.stringify(config))
-    expect(() => { validateLogs(logs) }).toThrow(new Error("Unknown warnings were found. See above for more details."))
+    expect(() => { validateLogs(logs) }).toThrow(new Error("Unknown log messages aren't allowed. See above for more details."))
     expect(getCallsToConsoleFn(console.log)).toMatchSnapshot()
   })
 
