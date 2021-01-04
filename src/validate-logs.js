@@ -4,24 +4,35 @@ const CONFIG_FILE_NAME = '.jest-logs-restrictions.json'
 
 function validateLogs(logMessages) {
   try {
-    // Check for max limit exceeded
     const logsRestrictions = getLatestWarningsRestrictions()
-    const { failedRestrictionsIndexes, currentRestrictionsCount } = processLogs(logsRestrictions, logMessages)
+    const { logsWithLimit } = logsRestrictions
+
+    // Check for max limit exceeded
+    const { failedRestrictionsIndexes, currentRestrictionsCount } = processLogs(logsWithLimit, logMessages)
     if (failedRestrictionsIndexes.size) {
-      printMaxLimitExceeded(logsRestrictions.logsWithLimit, failedRestrictionsIndexes, currentRestrictionsCount)
+      printMaxLimitExceeded(logsWithLimit, failedRestrictionsIndexes, currentRestrictionsCount)
       throw new Error("Error while validating log restrictions. See above for detailed report.")
     }
     
     // Validate outdated restrictions
-    const { failIfLogRestrictionsOutdated } = logsRestrictions
+    const { failIfLogRestrictionsOutdated = false } = logsRestrictions
     if (failIfLogRestrictionsOutdated) {
-      const outdatedRestrictionsIndexes = findOutdatedLogRestrictions(logsRestrictions.logsWithLimit, currentRestrictionsCount)
+      const outdatedRestrictionsIndexes = findOutdatedLogRestrictions(logsWithLimit, currentRestrictionsCount)
       if (outdatedRestrictionsIndexes.length) {
-        printOutdatedRestrictions(logsRestrictions.logsWithLimit, outdatedRestrictionsIndexes, currentRestrictionsCount)
+        printOutdatedRestrictions(logsWithLimit, outdatedRestrictionsIndexes, currentRestrictionsCount)
         throw new Error("Log restrictions are outdated. See above for detailed report.")
       }
     }
 
+    // Validate unknown log messages
+    const { failIfUnknownWarningsFound = false } = logsRestrictions
+    if (failIfUnknownWarningsFound) {
+      const unknownWarnings = findUnknownLogMessages(logsWithLimit, logMessages)
+      if (unknownWarnings.length) {
+        printUnknownLogMessages(unknownWarnings)
+        throw new Error("Unknown warnings were found. See above for more details.")
+      }
+    }
 
   } catch (err) {
     console.error("There was an error while processing warning restrictions", err)
@@ -41,8 +52,7 @@ function getLatestWarningsRestrictions() {
   return configObj
 }
 
-function processLogs(logRestrictions, warningLines) {
-  const { logsWithLimit } = logRestrictions
+function processLogs(logsWithLimit, warningLines) {
   // This represents if there are less warnings than expected
   const currentRestrictionsCount = Array(logsWithLimit.length).fill(0)
   const failedRestrictionsIndexes = new Set()
@@ -96,6 +106,30 @@ function printOutdatedRestrictions(logsWithLimit, outdatedRestrictionsIndexes, c
     const maximumAllowed = logsWithLimit[index].max
     const patterns = logsWithLimit[index].patterns.join(",")
     console.log(`- For pattern "${patterns}, the maximum allowed is ${maximumAllowed} but it should be ${currentCount}"`)
+  }
+}
+
+function findUnknownLogMessages(logsWithLimit, logMessages) {
+  const unknownLogMessages = []
+  for (const warningLine of logMessages) {
+    let hasMatchingPattern = false
+    for (const restriction of logsWithLimit) {
+      if (matchesRestriction(warningLine, restriction)) {
+        hasMatchingPattern = true
+        break
+      }
+    }
+    if (!hasMatchingPattern) {
+      unknownLogMessages.push(warningLine)
+    }
+  }
+  return unknownLogMessages
+}
+
+function printUnknownLogMessages(unknownLogMessages) {
+  console.log("Unknown warnings are not allowed. Please use the configuration of this reporter to validate how many times the following messages can appear:")
+  for (const message of unknownLogMessages) {
+    console.log(`- ${message}`)
   }
 }
 

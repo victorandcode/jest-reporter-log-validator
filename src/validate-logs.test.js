@@ -18,6 +18,7 @@ const validConfig = {
       "max": 1
     }
   ],
+  "failIfUnknownWarningsFound": false,
   "failIfLogRestrictionsOutdated": false
 }
 
@@ -86,7 +87,19 @@ describe("validateLogs", () => {
     expect(() => { validateLogs(logs) }).toThrow()
   })
 
-  it.todo("fails if FAIL_IF_UNKNOWN_LOG_MESSAGE is set to true and unknown warning is found")
+  it("fails if \"failIfUnknownWarningsFound\" is set to true and unknown warning is found", () => {
+    const config = {
+      ...validConfig,
+      failIfUnknownWarningsFound: true
+    }
+    const logs = [ 
+      'Warning: Each child in a list should have a unique "key" prop',
+      // The following warning does not exist in the configuration
+      "Warning: React.createFactory() is deprecated and will be removed in a future major release. Consider using JSX or use React.createElement() directly instead.",
+    ]
+    fs.readFileSync.mockImplementationOnce(() => JSON.stringify(config))
+    expect(() => { validateLogs(logs) }).toThrow(new Error("Unknown warnings were found. See above for more details."))
+  })
 
   it.todo("it succeed if warning without limit is found")
 })
