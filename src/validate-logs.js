@@ -85,7 +85,7 @@ function printMaxLimitExceeded(logsWithLimit, failedRestrictionsIndexes, current
     const expectedCount = logsWithLimit[index].max
     const currentCount = currentRestrictionsCount[index]
     const patterns = logsWithLimit[index].patterns.join(",")
-    console.log(`- For patterns "${patterns}", the expected is ${expectedCount}, actual is ${currentCount}`)
+    console.log(`- For pattern(s) "${patterns}", the expected is ${expectedCount}, actual is ${currentCount}`)
   }
 }
 
@@ -105,7 +105,7 @@ function printOutdatedRestrictions(logsWithLimit, outdatedRestrictionsIndexes, c
     const currentCount = currentRestrictionsCount[index]
     const maximumAllowed = logsWithLimit[index].max
     const patterns = logsWithLimit[index].patterns.join(",")
-    console.log(`- For pattern "${patterns}", the maximum allowed is ${maximumAllowed} but it should be ${currentCount}"`)
+    console.log(`- For pattern(s) "${patterns}", the maximum allowed is ${maximumAllowed} but it should be ${currentCount}`)
   }
 }
 

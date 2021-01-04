@@ -8,7 +8,7 @@ function getCallsToConsoleFn(consoleMockObj) {
   return consoleMockObj.mock.calls.join("\n")
 }
 
-const validConfig = {
+const baseConfig = {
   "logsWithLimit": [
     {
       "patterns": [
@@ -41,7 +41,7 @@ describe("validateLogs", () => {
       'Warning: Each child in a list should have a unique "key" prop',
       'Warning: Each child in a list should have a unique "key" prop',
     ]
-    fs.readFileSync.mockImplementationOnce(() => JSON.stringify(validConfig))
+    fs.readFileSync.mockImplementationOnce(() => JSON.stringify(baseConfig))
     expect(() => validateLogs(logs)).toThrow(new Error("Error while validating log restrictions. See above for detailed report."))
     expect(getCallsToConsoleFn(console.log)).toMatchSnapshot()
   })
@@ -52,7 +52,7 @@ describe("validateLogs", () => {
       "`wait` has been deprecated and replaced by `waitFor` instead.",
       'Warning: Each child in a list should have a unique "key" prop',
     ]
-    fs.readFileSync.mockImplementationOnce(() => JSON.stringify(validConfig))
+    fs.readFileSync.mockImplementationOnce(() => JSON.stringify(baseConfig))
     expect(() => validateLogs(logs)).not.toThrow()
   })
 
@@ -64,7 +64,7 @@ describe("validateLogs", () => {
 
   it("fails if failIfLogRestrictionsOutdated is set to true and log max has decrased", () => {
     const config = {
-      ...validConfig,
+      ...baseConfig,
       failIfLogRestrictionsOutdated: true
     }
     const logs = [ 
@@ -97,7 +97,7 @@ describe("validateLogs", () => {
 
   it("fails if \"failIfUnknownWarningsFound\" is set to true and unknown warning is found", () => {
     const config = {
-      ...validConfig,
+      ...baseConfig,
       failIfUnknownWarningsFound: true
     }
     const logs = [ 
@@ -112,7 +112,7 @@ describe("validateLogs", () => {
 
   it("succeeds if \"failIfUnknownWarningsFound\" is true and warning is inside \"logsWithoutLimit\"", () => {
     const config = {
-      ...validConfig,
+      ...baseConfig,
       failIfUnknownWarningsFound: true,
       logsWithoutLimit: [
         {
