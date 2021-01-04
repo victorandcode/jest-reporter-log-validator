@@ -3,6 +3,11 @@ const fs = require('fs')
 
 jest.mock("fs")
 
+// Serializes calls to a console so they can be used in snapshots
+function getCallsToConsoleFn(consoleMockObj) {
+  return consoleMockObj.mock.calls.join("\n")
+}
+
 const validConfig = {
   "logsWithLimit": [
     {
@@ -38,6 +43,7 @@ describe("validateLogs", () => {
     ]
     fs.readFileSync.mockImplementationOnce(() => JSON.stringify(validConfig))
     expect(() => validateLogs(logs)).toThrow(new Error("Error while validating log restrictions. See above for detailed report."))
+    expect(getCallsToConsoleFn(console.log)).toMatchSnapshot()
   })
 
   it("succeeds if no log max is exceeded", () => {
@@ -67,6 +73,7 @@ describe("validateLogs", () => {
     ]
     fs.readFileSync.mockImplementationOnce(() => JSON.stringify(config))
     expect(() => validateLogs(logs)).toThrow(new Error("Log restrictions are outdated. See above for detailed report."))
+    expect(getCallsToConsoleFn(console.log)).toMatchSnapshot()
   })
 
   it.skip("throws if schema doesn't have the correct structure", () => {
@@ -100,6 +107,7 @@ describe("validateLogs", () => {
     ]
     fs.readFileSync.mockImplementationOnce(() => JSON.stringify(config))
     expect(() => { validateLogs(logs) }).toThrow(new Error("Unknown warnings were found. See above for more details."))
+    expect(getCallsToConsoleFn(console.log)).toMatchSnapshot()
   })
 
   it("succeeds if \"failIfUnknownWarningsFound\" is true and warning is inside \"logsWithoutLimit\"", () => {

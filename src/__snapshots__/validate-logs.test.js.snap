@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`validateLogs fails if "failIfUnknownWarningsFound" is set to true and unknown warning is found 1`] = `
+"Unknown warnings are not allowed. Please use the configuration of this reporter to validate how many times the following messages can appear:
+- Warning: React.createFactory() is deprecated and will be removed in a future major release. Consider using JSX or use React.createElement() directly instead."
+`;
+
+exports[`validateLogs fails if failIfLogRestrictionsOutdated is set to true and log max has decrased 1`] = `
+"You have less warnings than what is declared in your configuration file. Please adjust it according to this:
+- For pattern \\"Each child in a list should have a unique\\", the maximum allowed is 2 but it should be 1\\""
+`;
+
+exports[`validateLogs fails if log max limit is exceeded 1`] = `
+"The following warning violations were found:
+- For patterns \\"Each child in a list should have a unique\\", the expected is 2, actual is 3"
+`;

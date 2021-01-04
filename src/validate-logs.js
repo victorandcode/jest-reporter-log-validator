@@ -80,12 +80,12 @@ function matchesRestriction(warning, restriction) {
 }
 
 function printMaxLimitExceeded(logsWithLimit, failedRestrictionsIndexes, currentRestrictionsCount) {
-  console.error("The following warning violations were found:")
+  console.log("The following warning violations were found:")
   for (const index of failedRestrictionsIndexes) {
     const expectedCount = logsWithLimit[index].max
     const currentCount = currentRestrictionsCount[index]
     const patterns = logsWithLimit[index].patterns.join(",")
-    console.error(`- For patterns "${patterns}", the expected is ${expectedCount}, actual is ${currentCount}`)
+    console.log(`- For patterns "${patterns}", the expected is ${expectedCount}, actual is ${currentCount}`)
   }
 }
 
@@ -105,7 +105,7 @@ function printOutdatedRestrictions(logsWithLimit, outdatedRestrictionsIndexes, c
     const currentCount = currentRestrictionsCount[index]
     const maximumAllowed = logsWithLimit[index].max
     const patterns = logsWithLimit[index].patterns.join(",")
-    console.log(`- For pattern "${patterns}, the maximum allowed is ${maximumAllowed} but it should be ${currentCount}"`)
+    console.log(`- For pattern "${patterns}", the maximum allowed is ${maximumAllowed} but it should be ${currentCount}"`)
   }
 }
 
