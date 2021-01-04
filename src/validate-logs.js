@@ -1,10 +1,5 @@
-const fs = require("fs")
-
-const CONFIG_FILE_NAME = '.jest-logs-validations-config.json'
-
-function validateLogs(logMessages) {
+function validateLogs(logsValidationsConfig, logMessages) {
   try {
-    const logsValidationsConfig = getLogsValidationsConfig()
     const { logValidations } = logsValidationsConfig
 
     // Check for max limit exceeded
@@ -38,18 +33,6 @@ function validateLogs(logMessages) {
     console.error("There was an error while processing log messages", err)
     throw err
   }
-}
-
-/**
- * Parse config file's content
- */
-function getLogsValidationsConfig() {
-  const configObj = JSON.parse(fs.readFileSync(CONFIG_FILE_NAME))
-  // Validate schema
-  if (typeof configObj.logValidations !== "object" || configObj.logValidations.length === undefined) {
-    throw new Error("Invalid configuration, logValidations should be an array")
-  }
-  return configObj
 }
 
 function processLogValidations(logValidations, logMessages) {

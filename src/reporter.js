@@ -1,4 +1,5 @@
 const { validateLogs } = require('./validate-logs')
+const { getConfiguration } = require("./config")
 
 class JestReporterLogValidator {
   constructor(globalConfig, options) {
@@ -8,8 +9,6 @@ class JestReporterLogValidator {
     this._logMessages = []
   }
 
-  onTestStart(test) { }
-
   onTestResult(_, testResult) {
     if (testResult.console) {
       for (const logObj of testResult.console) {
@@ -18,10 +17,13 @@ class JestReporterLogValidator {
     }
   }
 
-  onRunStart(results) { }
-
-  onRunComplete(contexts, results) {
-    validateLogs(this._logMessages)
+  getLastError() {
+    try {
+      const config = getConfiguration(process.cwd())
+      validateLogs(config, this._logMessages)
+    } catch (ex) {
+      return ex
+    }
   }
 }
 
