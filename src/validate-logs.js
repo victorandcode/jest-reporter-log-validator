@@ -9,7 +9,7 @@ function validateLogs(logMessages) {
 
     // Check for max limit exceeded
     const { failedRestrictionsIndexes, currentRestrictionsCount } = processLogs(logValidations, logMessages)
-    if (failedRestrictionsIndexes.size) {
+    if (failedRestrictionsIndexes.length) {
       printMaxLimitExceeded(logValidations, failedRestrictionsIndexes, currentRestrictionsCount)
       throw new Error("Error while validating log restrictions. See above for detailed report.")
     }
@@ -55,19 +55,19 @@ function getLogMessagesRestrictions() {
 function processLogs(logValidations, logMessages) {
   // This represents if there are less log messages with a certain pattern than expected
   const currentRestrictionsCount = Array(logValidations.length).fill(0)
-  const failedRestrictionsIndexes = new Set()
+  const failedValidationsIndexesSet = new Set()
   for (const message of logMessages) {
     for (const [restrictionIndex, restriction] of logValidations.entries()) {
       if (matchesRestriction(message, restriction)) {
         currentRestrictionsCount[restrictionIndex] += 1
         if (currentRestrictionsCount[restrictionIndex] > restriction.max) {
-          failedRestrictionsIndexes.add(restrictionIndex)
+          failedValidationsIndexesSet.add(restrictionIndex)
         }
       }
     }
   }
 
-  return {failedRestrictionsIndexes, currentRestrictionsCount}
+  return {failedRestrictionsIndexes: Array.from(failedValidationsIndexesSet), currentRestrictionsCount}
 }
 
 function matchesRestriction(logMessage, restriction) {
