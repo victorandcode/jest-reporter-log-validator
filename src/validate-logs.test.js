@@ -42,7 +42,7 @@ describe("validateLogs", () => {
       'Warning: Each child in a list should have a unique "key" prop',
     ]
     fs.readFileSync.mockImplementationOnce(() => JSON.stringify(baseConfig))
-    expect(() => validateLogs(logs)).toThrow(new Error("Error while validating log restrictions. See above for detailed report."))
+    expect(() => validateLogs(logs)).toThrow(new Error("Error while checking log validations. See above for detailed report."))
     expect(getCallsToConsoleFn(console.log)).toMatchSnapshot()
   })
 
@@ -72,7 +72,7 @@ describe("validateLogs", () => {
       "`wait` has been deprecated and replaced by `waitFor` instead.",
     ]
     fs.readFileSync.mockImplementationOnce(() => JSON.stringify(config))
-    expect(() => validateLogs(logs)).toThrow(new Error("Log restrictions are outdated. See above for detailed report."))
+    expect(() => validateLogs(logs)).toThrow(new Error("Log validations are outdated. See above for detailed report."))
     expect(getCallsToConsoleFn(console.log)).toMatchSnapshot()
   })
 

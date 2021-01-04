@@ -4,28 +4,28 @@ const CONFIG_FILE_NAME = '.jest-logs-validations-config.json'
 
 function validateLogs(logMessages) {
   try {
-    const logsRestrictions = getLogMessagesRestrictions()
-    const { logValidations } = logsRestrictions
+    const logsValidationsConfig = getLogsValidationsConfig()
+    const { logValidations } = logsValidationsConfig
 
     // Check for max limit exceeded
-    const { failedRestrictionsIndexes, currentRestrictionsCount } = processLogs(logValidations, logMessages)
-    if (failedRestrictionsIndexes.length) {
-      printMaxLimitExceeded(logValidations, failedRestrictionsIndexes, currentRestrictionsCount)
-      throw new Error("Error while validating log restrictions. See above for detailed report.")
+    const { failedValidationsIndexes, currentLogMessagesCount } = processLogValidations(logValidations, logMessages)
+    if (failedValidationsIndexes.length) {
+      printMaxLimitExceeded(logValidations, failedValidationsIndexes, currentLogMessagesCount)
+      throw new Error("Error while checking log validations. See above for detailed report.")
     }
     
-    // Validate outdated restrictions
-    const { failIfLogValidationsOutdated = false } = logsRestrictions
+    // Check for outdated log validations
+    const { failIfLogValidationsOutdated = false } = logsValidationsConfig
     if (failIfLogValidationsOutdated) {
-      const outdatedRestrictionsIndexes = findOutdatedLogRestrictions(logValidations, currentRestrictionsCount)
-      if (outdatedRestrictionsIndexes.length) {
-        printOutdatedRestrictions(logValidations, outdatedRestrictionsIndexes, currentRestrictionsCount)
-        throw new Error("Log restrictions are outdated. See above for detailed report.")
+      const outdatedLogValidationsIndexes = findOutdatedLogValidations(logValidations, currentLogMessagesCount)
+      if (outdatedLogValidationsIndexes.length) {
+        printOutdatedLogValidations(logValidations, outdatedLogValidationsIndexes, currentLogMessagesCount)
+        throw new Error("Log validations are outdated. See above for detailed report.")
       }
     }
 
     // Validate unknown log messages
-    const { failIfUnknownLogsFound = false, exemptLogs = [] } = logsRestrictions
+    const { failIfUnknownLogsFound = false, exemptLogs = [] } = logsValidationsConfig
     if (failIfUnknownLogsFound) {
       const unknownLogMessages = findUnknownLogMessages(logValidations, exemptLogs, logMessages)
       if (unknownLogMessages.length) {
@@ -43,7 +43,7 @@ function validateLogs(logMessages) {
 /**
  * Parse config file's content
  */
-function getLogMessagesRestrictions() {
+function getLogsValidationsConfig() {
   const configObj = JSON.parse(fs.readFileSync(CONFIG_FILE_NAME))
   // Validate schema
   if (typeof configObj.logValidations !== "object" || configObj.logValidations.length === undefined) {
@@ -52,26 +52,26 @@ function getLogMessagesRestrictions() {
   return configObj
 }
 
-function processLogs(logValidations, logMessages) {
+function processLogValidations(logValidations, logMessages) {
   // This represents if there are less log messages with a certain pattern than expected
-  const currentRestrictionsCount = Array(logValidations.length).fill(0)
+  const currentLogMessagesCount = Array(logValidations.length).fill(0)
   const failedValidationsIndexesSet = new Set()
   for (const message of logMessages) {
-    for (const [restrictionIndex, restriction] of logValidations.entries()) {
-      if (matchesRestriction(message, restriction)) {
-        currentRestrictionsCount[restrictionIndex] += 1
-        if (currentRestrictionsCount[restrictionIndex] > restriction.max) {
-          failedValidationsIndexesSet.add(restrictionIndex)
+    for (const [validationIndex, validation] of logValidations.entries()) {
+      if (matchesPatterns(message, validation.patterns)) {
+        currentLogMessagesCount[validationIndex] += 1
+        if (currentLogMessagesCount[validationIndex] > validation.max) {
+          failedValidationsIndexesSet.add(validationIndex)
         }
       }
     }
   }
 
-  return {failedRestrictionsIndexes: Array.from(failedValidationsIndexesSet), currentRestrictionsCount}
+  return {failedValidationsIndexes: Array.from(failedValidationsIndexesSet), currentLogMessagesCount}
 }
 
-function matchesRestriction(logMessage, restriction) {
-  for (const pattern of restriction.patterns) {
+function matchesPatterns(logMessage, patterns) {
+  for (const pattern of patterns) {
     if (logMessage.includes(pattern)) {
       return true
     }
@@ -79,30 +79,30 @@ function matchesRestriction(logMessage, restriction) {
   return false
 }
 
-function printMaxLimitExceeded(logValidations, failedRestrictionsIndexes, currentRestrictionsCount) {
+function printMaxLimitExceeded(logValidations, failedValidationsIndexes, currentLogMessagesCount) {
   console.log("The following log message validations failed:")
-  for (const index of failedRestrictionsIndexes) {
+  for (const index of failedValidationsIndexes) {
     const expectedCount = logValidations[index].max
-    const currentCount = currentRestrictionsCount[index]
+    const currentCount = currentLogMessagesCount[index]
     const patterns = logValidations[index].patterns.join(",")
     console.log(`- For pattern(s) "${patterns}", the expected is ${expectedCount}, actual is ${currentCount}`)
   }
 }
 
-function findOutdatedLogRestrictions(logValidations, currentRestrictionsCount) {
-  const outdatedLogRestrictionsIndexes = []
+function findOutdatedLogValidations(logValidations, currentLogMessagesCount) {
+  const outdatedLogValidationsIndexes = []
   for (const [index, logWithValidations] of logValidations.entries()) {
-    if (logWithValidations.max > currentRestrictionsCount[index]) {
-      outdatedLogRestrictionsIndexes.push(index)
+    if (logWithValidations.max > currentLogMessagesCount[index]) {
+      outdatedLogValidationsIndexes.push(index)
     }
   }
-  return outdatedLogRestrictionsIndexes
+  return outdatedLogValidationsIndexes
 }
 
-function printOutdatedRestrictions(logValidations, outdatedRestrictionsIndexes, currentRestrictionsCount) {
+function printOutdatedLogValidations(logValidations, outdatedLogValidationsIndexes, currentLogMessagesCount) {
   console.log("You must lower the number of allowed log messages matching certain patterns. Please adjust your config file according to the following:")
-  for (const index of outdatedRestrictionsIndexes) {
-    const currentCount = currentRestrictionsCount[index]
+  for (const index of outdatedLogValidationsIndexes) {
+    const currentCount = currentLogMessagesCount[index]
     const maximumAllowed = logValidations[index].max
     const patterns = logValidations[index].patterns.join(",")
     console.log(`- For pattern(s) "${patterns}", the maximum allowed is ${maximumAllowed} but it should be ${currentCount}`)
@@ -114,8 +114,8 @@ function findUnknownLogMessages(logValidations, exemptLogs, logMessages) {
   for (const message of logMessages) {
     let hasMatchingPattern = false
     // Check if it has limit
-    for (const restriction of logValidations) {
-      if (matchesRestriction(message, restriction)) {
+    for (const validation of logValidations) {
+      if (matchesPatterns(message, validation.patterns)) {
         hasMatchingPattern = true
         break
       }
@@ -123,8 +123,8 @@ function findUnknownLogMessages(logValidations, exemptLogs, logMessages) {
     if (!hasMatchingPattern) {
       let hasNoLimit = false
       // Check if it's in the no limit list
-      for (const restriction of exemptLogs) {
-        if (matchesRestriction(message, restriction)) {
+      for (const validation of exemptLogs) {
+        if (matchesPatterns(message, validation.patterns)) {
           hasNoLimit = true
         }
       }
