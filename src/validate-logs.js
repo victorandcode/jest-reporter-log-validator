@@ -25,17 +25,17 @@ function validateLogs(logMessages) {
     }
 
     // Validate unknown log messages
-    const { failIfUnknownWarningsFound = false, logsWithoutLimit = [] } = logsRestrictions
-    if (failIfUnknownWarningsFound) {
-      const unknownWarnings = findUnknownLogMessages(logsWithLimit, logsWithoutLimit, logMessages)
-      if (unknownWarnings.length) {
-        printUnknownLogMessages(unknownWarnings)
-        throw new Error("Unknown warnings were found. See above for more details.")
+    const { failIfUnknownLogsFound = false, logsWithoutLimit = [] } = logsRestrictions
+    if (failIfUnknownLogsFound) {
+      const unknownLogMessages = findUnknownLogMessages(logsWithLimit, logsWithoutLimit, logMessages)
+      if (unknownLogMessages.length) {
+        printUnknownLogMessages(unknownLogMessages)
+        throw new Error("Unknown log messages aren't allowed. See above for more details.")
       }
     }
 
   } catch (err) {
-    console.error("There was an error while processing warning restrictions", err)
+    console.error("There was an error while processing log messages", err)
     throw err
   }
 }
@@ -52,13 +52,13 @@ function getLogMessagesRestrictions() {
   return configObj
 }
 
-function processLogs(logsWithLimit, warningLines) {
-  // This represents if there are less warnings than expected
+function processLogs(logsWithLimit, logMessages) {
+  // This represents if there are less log messages with a certain pattern than expected
   const currentRestrictionsCount = Array(logsWithLimit.length).fill(0)
   const failedRestrictionsIndexes = new Set()
-  for (const warningLine of warningLines) {
+  for (const message of logMessages) {
     for (const [restrictionIndex, restriction] of logsWithLimit.entries()) {
-      if (matchesRestriction(warningLine, restriction)) {
+      if (matchesRestriction(message, restriction)) {
         currentRestrictionsCount[restrictionIndex] += 1
         if (currentRestrictionsCount[restrictionIndex] > restriction.max) {
           failedRestrictionsIndexes.add(restrictionIndex)
@@ -70,9 +70,9 @@ function processLogs(logsWithLimit, warningLines) {
   return {failedRestrictionsIndexes, currentRestrictionsCount}
 }
 
-function matchesRestriction(warning, restriction) {
+function matchesRestriction(logMessage, restriction) {
   for (const pattern of restriction.patterns) {
-    if (warning.includes(pattern)) {
+    if (logMessage.includes(pattern)) {
       return true
     }
   }
@@ -80,7 +80,7 @@ function matchesRestriction(warning, restriction) {
 }
 
 function printMaxLimitExceeded(logsWithLimit, failedRestrictionsIndexes, currentRestrictionsCount) {
-  console.log("The following warning violations were found:")
+  console.log("The following log message validations failed:")
   for (const index of failedRestrictionsIndexes) {
     const expectedCount = logsWithLimit[index].max
     const currentCount = currentRestrictionsCount[index]
@@ -100,7 +100,7 @@ function findOutdatedLogRestrictions(logsWithLimit, currentRestrictionsCount) {
 }
 
 function printOutdatedRestrictions(logsWithLimit, outdatedRestrictionsIndexes, currentRestrictionsCount) {
-  console.log("You have less warnings than what is declared in your configuration file. Please adjust it according to this:")
+  console.log("You must lower the number of allowed log messages matching certain patterns. Please adjust your config file according to the following:")
   for (const index of outdatedRestrictionsIndexes) {
     const currentCount = currentRestrictionsCount[index]
     const maximumAllowed = logsWithLimit[index].max
@@ -111,11 +111,11 @@ function printOutdatedRestrictions(logsWithLimit, outdatedRestrictionsIndexes, c
 
 function findUnknownLogMessages(logsWithLimit, logsWithoutLimit, logMessages) {
   const unknownLogMessages = []
-  for (const warningLine of logMessages) {
+  for (const message of logMessages) {
     let hasMatchingPattern = false
     // Check if it has limit
     for (const restriction of logsWithLimit) {
-      if (matchesRestriction(warningLine, restriction)) {
+      if (matchesRestriction(message, restriction)) {
         hasMatchingPattern = true
         break
       }
@@ -124,12 +124,12 @@ function findUnknownLogMessages(logsWithLimit, logsWithoutLimit, logMessages) {
       let hasNoLimit = false
       // Check if it's in the no limit list
       for (const restriction of logsWithoutLimit) {
-        if (matchesRestriction(warningLine, restriction)) {
+        if (matchesRestriction(message, restriction)) {
           hasNoLimit = true
         }
       }
       if (!hasNoLimit) {
-        unknownLogMessages.push(warningLine)
+        unknownLogMessages.push(message)
       }
     }
   }
@@ -137,7 +137,7 @@ function findUnknownLogMessages(logsWithLimit, logsWithoutLimit, logMessages) {
 }
 
 function printUnknownLogMessages(unknownLogMessages) {
-  console.log("Unknown warnings are not allowed. Please use the configuration of this reporter to validate how many times the following messages can appear:")
+  console.log("Unknown log messages are not allowed. Please use the configuration of this reporter to validate how many times the following messages can appear:")
   for (const message of unknownLogMessages) {
     console.log(`- ${message}`)
   }

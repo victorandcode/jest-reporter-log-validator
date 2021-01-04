@@ -24,7 +24,7 @@ const baseConfig = {
     }
   ],
   "logsWithoutLimit": [],
-  "failIfUnknownWarningsFound": false,
+  "failIfUnknownLogsFound": false,
   "failIfLogRestrictionsOutdated": false
 }
 
@@ -95,10 +95,10 @@ describe("validateLogs", () => {
     expect(() => { validateLogs(logs) }).toThrow()
   })
 
-  it("fails if \"failIfUnknownWarningsFound\" is set to true and unknown warning is found", () => {
+  it("fails if \"failIfUnknownLogsFound\" is set to true and unknown warning is found", () => {
     const config = {
       ...baseConfig,
-      failIfUnknownWarningsFound: true
+      failIfUnknownLogsFound: true
     }
     const logs = [ 
       'Warning: Each child in a list should have a unique "key" prop',
@@ -110,10 +110,10 @@ describe("validateLogs", () => {
     expect(getCallsToConsoleFn(console.log)).toMatchSnapshot()
   })
 
-  it("succeeds if \"failIfUnknownWarningsFound\" is true and warning is inside \"logsWithoutLimit\"", () => {
+  it("succeeds if \"failIfUnknownLogsFound\" is true and warning is inside \"logsWithoutLimit\"", () => {
     const config = {
       ...baseConfig,
-      failIfUnknownWarningsFound: true,
+      failIfUnknownLogsFound: true,
       logsWithoutLimit: [
         {
           "patterns": ["Error: Uncaught [TypeError: Cannot read property 'then' of undefined]"]
