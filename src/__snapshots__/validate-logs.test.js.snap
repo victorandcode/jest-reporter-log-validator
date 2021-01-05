@@ -10,7 +10,7 @@ exports[`validateLogs fails if failIfLogValidationsOutdated is set to true and l
 - For pattern(s) \\"Each child in a list should have a unique\\", the maximum allowed is 2 but it should be 1"
 `;
 
-exports[`validateLogs fails if log max limit is exceeded 1`] = `
+exports[`validateLogs fails if log message appears more times than allowed 1`] = `
 "The following log message validations failed:
 - For pattern(s) \\"Each child in a list should have a unique\\", the expected is 2, actual is 3"
 `;

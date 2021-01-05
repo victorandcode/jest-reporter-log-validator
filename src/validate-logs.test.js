@@ -34,7 +34,7 @@ beforeEach(() => {
 })
 
 describe("validateLogs", () => {
-  it("fails if log max limit is exceeded", () => {
+  it("fails if log message appears more times than allowed", () => {
     const logs = [
       'Warning: Each child in a list should have a unique "key" prop',
       "`wait` has been deprecated and replaced by `waitFor` instead.",
@@ -45,13 +45,32 @@ describe("validateLogs", () => {
     expect(getCallsToConsoleFn(console.log)).toMatchSnapshot()
   })
 
-  it("succeeds if no log max is exceeded", () => {
+  it("succeeds if log message appears less times than allowed", () => {
     const logs = [
       'Warning: Each child in a list should have a unique "key" prop',
       "`wait` has been deprecated and replaced by `waitFor` instead.",
       'Warning: Each child in a list should have a unique "key" prop',
     ]
     expect(() => validateLogs(getConfig(), logs)).not.toThrow()
+  })
+
+  it("succeeds if log message doesn't match all validation patterns", () => {
+    const logs = [
+      'Warning: Each child in a list should have a unique "key" prop',
+      'Warning: Each child in a list should have a unique "key" prop',
+    ]
+    expect(() => validateLogs(getConfig({
+      "logValidations": [
+        {
+          "patterns": [
+            "Warning: Each child in a list should have a unique",
+            // The following string does not appear in the messages
+            "\"name\" prop"
+          ],
+          "max": 0
+        },
+      ],
+    }), logs)).not.toThrow()
   })
 
   it("fails if failIfLogValidationsOutdated is set to true and log max has decrased", () => {

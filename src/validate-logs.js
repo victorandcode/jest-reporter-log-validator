@@ -53,13 +53,17 @@ function processLogValidations(logValidations, logMessages) {
   return {failedValidationsIndexes: Array.from(failedValidationsIndexesSet), currentLogMessagesCount}
 }
 
+/**
+ * Returns true if message matches all patterns and patterns has at least one element
+ */
 function matchesPatterns(logMessage, patterns) {
+  let matchingPatterns = 0
   for (const pattern of patterns) {
     if (logMessage.includes(pattern)) {
-      return true
+      matchingPatterns += 1
     }
   }
-  return false
+  return matchingPatterns === 0 ? false : patterns.length === matchingPatterns
 }
 
 function printMaxLimitExceeded(logValidations, failedValidationsIndexes, currentLogMessagesCount) {
