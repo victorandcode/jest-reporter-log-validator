@@ -10,8 +10,14 @@ const DEFAULT_CONFIG = {
 const PACKAGE_JSON_CONFIG_KEY = "jest-reporter-log-validator"
 const CONFIG_FILE_NAME = ".jest-logs-validations-config.json"
 
-function getConfiguration(pathToResolve) {
-  return Object.assign({}, {...DEFAULT_CONFIG}, getFromPackageJson(pathToResolve), getFromConfigFile(pathToResolve)) 
+function getConfiguration(pathToResolve, reporterOptions = {}) {
+  return Object.assign(
+    {},
+    DEFAULT_CONFIG, 
+    getFromPackageJson(pathToResolve),
+    reporterOptions,
+    getFromConfigFile(pathToResolve)
+  )
 }
 
 // Copied from https://github.com/jest-community/jest-junit/blob/master/utils/getOptions.js

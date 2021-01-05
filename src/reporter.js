@@ -6,6 +6,7 @@ class JestReporterLogValidator {
     if (globalConfig.verbose === true) {
       throw Error("Invalid configuration. Verbose must be false when using jest-reporter-log-validator. Otherwise, console messages won't be available to the reporter.")
     }
+    this._options = options
     this._logMessages = []
   }
 
@@ -19,7 +20,7 @@ class JestReporterLogValidator {
 
   getLastError() {
     try {
-      const config = getConfiguration(process.cwd())
+      const config = getConfiguration(process.cwd(), this._options)
       validateLogs(config, this._logMessages)
     } catch (ex) {
       return ex

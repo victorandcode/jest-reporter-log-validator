@@ -42,6 +42,26 @@ describe("getConfiguration", () => {
     })
   })
 
+  it("extends defaults with reporter options", () => {
+    const reporterOptions = {
+      "logValidations": [
+        {
+          "patterns": ["warning defined in reporter options"],
+          "max": 1
+        }
+      ],
+    }
+    expect(getConfiguration("/", reporterOptions)).toEqual({
+      ...DEFAULT_CONFIG,
+      "logValidations": [
+        {
+          "patterns": ["warning defined in reporter options"],
+          "max": 1
+        }
+      ],
+    })
+  })
+
   it("extends config based on config file", () => {
     fs.readFileSync.mockImplementationOnce(() => JSON.stringify({
       "exemptLogs": [
