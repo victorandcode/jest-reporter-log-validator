@@ -2,10 +2,11 @@
   "name": "jest-reporter-log-validator",
   "version": "0.1.0",
   "description": "Jest reporter to validate log messages produced by tests",
-  "main": "dist/index.js",
+  "main": "src/reporter.js",
   "scripts": {
     "test": "jest src/",
-    "test:watch": "jest src/ --watch"
+    "test:watch": "jest src/ --watch",
+    "prepublishOnly": "npm run test"
   },
   "repository": {
     "type": "git",
