@@ -8,7 +8,7 @@ const DEFAULT_CONFIG = {
   "exemptLogs": [],
 }
 const PACKAGE_JSON_CONFIG_KEY = "jest-reporter-log-validator"
-const CONFIG_FILE_NAME = ".jest-logs-validations-config.json"
+const CONFIG_FILE_NAME = ".jest-reporter-log-validator-config.json"
 
 function getConfiguration(pathToResolve, reporterOptions = {}) {
   return Object.assign(
