@@ -1,3 +1,6 @@
+const chalk = require("chalk")
+const { table } = require("table")
+
 function validateLogs(logsValidationsConfig, logMessages) {
   try {
     const { logValidations } = logsValidationsConfig
@@ -66,14 +69,29 @@ function matchesPatterns(logMessage, patterns) {
   return matchingPatterns === 0 ? false : patterns.length === matchingPatterns
 }
 
+function printTitle(msg) {
+  console.log(chalk.bold.red(msg))
+}
+
 function printMaxLimitExceeded(logValidations, failedValidationsIndexes, currentLogMessagesCount) {
-  console.log("The following log message validations failed:")
+  printTitle("The following message violations were found. Please adjust the values in your configuration file:")
+  const tableCells = [
+    ["Pattern(s)", "Maximum allowed", "Times it appeared"]
+  ]
   for (const index of failedValidationsIndexes) {
     const expectedCount = logValidations[index].max
     const currentCount = currentLogMessagesCount[index]
-    const patterns = logValidations[index].patterns.join(",")
-    console.log(`- For pattern(s) "${patterns}", the expected is ${expectedCount}, actual is ${currentCount}`)
+    const patterns = logValidations[index].patterns.map(pattern => `"${pattern}"`).join(", ")
+    tableCells.push([`[${patterns}]`, expectedCount, chalk.red(currentCount)])
   }
+  console.log(table(tableCells, {
+    columns: {
+      0: {
+        alignment: 'left',
+        width: 70
+      },
+    }}
+  ))
 }
 
 function findOutdatedLogValidations(logValidations, currentLogMessagesCount) {
@@ -87,13 +105,28 @@ function findOutdatedLogValidations(logValidations, currentLogMessagesCount) {
 }
 
 function printOutdatedLogValidations(logValidations, outdatedLogValidationsIndexes, currentLogMessagesCount) {
-  console.log("You must lower the number of allowed log messages matching certain patterns. Please adjust your config file according to the following:")
+  printTitle("Some warnings have decreased. Please adjust your config file accordingly. See details here:")
+  const tableCells = [
+    ["Pattern(s)", "Current maximum", "Expected maximum"]
+  ]
   for (const index of outdatedLogValidationsIndexes) {
     const currentCount = currentLogMessagesCount[index]
     const maximumAllowed = logValidations[index].max
-    const patterns = logValidations[index].patterns.join(",")
-    console.log(`- For pattern(s) "${patterns}", the maximum allowed is ${maximumAllowed} but it should be ${currentCount}`)
+    const patterns = logValidations[index].patterns.map(pattern => `"${pattern}"`).join(", ")
+    tableCells.push([
+      `[${patterns}]`,
+      chalk.red(maximumAllowed),
+      chalk.green(currentCount)
+    ])
   }
+  console.log(table(tableCells, {
+    columns: {
+      0: {
+        alignment: 'left',
+        width: 70
+      },
+    }}
+  ))
 }
 
 function findUnknownLogMessages(logValidations, exemptLogs, logMessages) {
@@ -124,9 +157,11 @@ function findUnknownLogMessages(logValidations, exemptLogs, logMessages) {
 }
 
 function printUnknownLogMessages(unknownLogMessages) {
-  console.log("Unknown log messages are not allowed. Please use the configuration of this reporter to validate how many times the following messages can appear:")
+  printTitle("Unknown log messages are not allowed. Please use the configuration of this reporter to validate how many times the following messages can appear:")
+  let counter = 1
   for (const message of unknownLogMessages) {
-    console.log(`- ${message}`)
+    console.log(chalk.bold.magenta(`${counter}) `) + message)
+    counter += 1
   }
 }
 
