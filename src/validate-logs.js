@@ -1,5 +1,5 @@
-const chalk = require("chalk")
-const { table } = require("table")
+const { printTitle, printOrderedListItem, printTable, dangerText, successText } = require("./stdout")
+const { matchesPatterns } = require("./utils")
 
 function validateLogs(logsValidationsConfig, logMessages) {
   try {
@@ -56,25 +56,8 @@ function processLogValidations(logValidations, logMessages) {
   return {failedValidationsIndexes: Array.from(failedValidationsIndexesSet), currentLogMessagesCount}
 }
 
-/**
- * Returns true if message matches all patterns and patterns has at least one element
- */
-function matchesPatterns(logMessage, patterns) {
-  let matchingPatterns = 0
-  for (const pattern of patterns) {
-    if (logMessage.includes(pattern)) {
-      matchingPatterns += 1
-    }
-  }
-  return matchingPatterns === 0 ? false : patterns.length === matchingPatterns
-}
-
-function printTitle(msg) {
-  console.log(chalk.bold.red(msg))
-}
-
 function printMaxLimitExceeded(logValidations, failedValidationsIndexes, currentLogMessagesCount) {
-  printTitle("The following message violations were found. Please adjust the values in your configuration file:")
+  printTitle("The following log validations failed. Please adjust the values in your configuration file:")
   const tableCells = [
     ["Pattern(s)", "Maximum allowed", "Times it appeared"]
   ]
@@ -82,16 +65,9 @@ function printMaxLimitExceeded(logValidations, failedValidationsIndexes, current
     const expectedCount = logValidations[index].max
     const currentCount = currentLogMessagesCount[index]
     const patterns = logValidations[index].patterns.map(pattern => `"${pattern}"`).join(", ")
-    tableCells.push([`[${patterns}]`, expectedCount, chalk.red(currentCount)])
+    tableCells.push([`[${patterns}]`, expectedCount, dangerText(currentCount)])
   }
-  console.log(table(tableCells, {
-    columns: {
-      0: {
-        alignment: 'left',
-        width: 70
-      },
-    }}
-  ))
+  printTable({ cells: tableCells })
 }
 
 function findOutdatedLogValidations(logValidations, currentLogMessagesCount) {
@@ -115,18 +91,13 @@ function printOutdatedLogValidations(logValidations, outdatedLogValidationsIndex
     const patterns = logValidations[index].patterns.map(pattern => `"${pattern}"`).join(", ")
     tableCells.push([
       `[${patterns}]`,
-      chalk.red(maximumAllowed),
-      chalk.green(currentCount)
+      dangerText(maximumAllowed),
+      successText(currentCount)
     ])
   }
-  console.log(table(tableCells, {
-    columns: {
-      0: {
-        alignment: 'left',
-        width: 70
-      },
-    }}
-  ))
+  printTable({
+     cells: tableCells
+  })
 }
 
 function findUnknownLogMessages(logValidations, exemptLogs, logMessages) {
@@ -157,10 +128,10 @@ function findUnknownLogMessages(logValidations, exemptLogs, logMessages) {
 }
 
 function printUnknownLogMessages(unknownLogMessages) {
-  printTitle("Unknown log messages are not allowed. Please use the configuration of this reporter to validate how many times the following messages can appear:")
+  printTitle("Unknown log messages are not allowed. Please use the configuration of this reporter to validate how many times the following messages can appear through \"logValidations\" or \"exemptLogs\":")
   let counter = 1
   for (const message of unknownLogMessages) {
-    console.log(chalk.bold.magenta(`${counter}) `) + message)
+    printOrderedListItem(counter, message)
     counter += 1
   }
 }

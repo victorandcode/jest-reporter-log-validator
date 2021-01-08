@@ -1,16 +1,32 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`validateLogs fails if "failIfUnknownLogsFound" is set to true and unknown warning is found 1`] = `
-"Unknown log messages are not allowed. Please use the configuration of this reporter to validate how many times the following messages can appear:
-- Warning: React.createFactory() is deprecated and will be removed in a future major release. Consider using JSX or use React.createElement() directly instead."
+"Unknown log messages are not allowed. Please use the configuration of this reporter to validate how many times the following messages can appear through \\"logValidations\\" or \\"exemptLogs\\":
+1) Warning: React.createFactory() is deprecated and will be removed in a future major release. Consider using JSX or use React.createElement() directly instead."
 `;
 
 exports[`validateLogs fails if failIfLogValidationsOutdated is set to true and log max has decrased 1`] = `
-"You must lower the number of allowed log messages matching certain patterns. Please adjust your config file according to the following:
-- For pattern(s) \\"Each child in a list should have a unique\\", the maximum allowed is 2 but it should be 1"
+"Some warnings have decreased. Please adjust your config file accordingly. See details here:
+╔════════════════════════════════════════════════════════════════════════╤═════════════════╤══════════════════╗
+║ Pattern(s)                                                             │ Current maximum │ Expected maximum ║
+╟────────────────────────────────────────────────────────────────────────┼─────────────────┼──────────────────╢
+║ [\\"Each child in a list should have a unique\\"]                          │ 2               │ 1                ║
+╚════════════════════════════════════════════════════════════════════════╧═════════════════╧══════════════════╝
+"
 `;
 
 exports[`validateLogs fails if log message appears more times than allowed 1`] = `
-"The following log message validations failed:
-- For pattern(s) \\"Each child in a list should have a unique\\", the expected is 2, actual is 3"
+"The following log validations failed. Please adjust the values in your configuration file:
+╔════════════════════════════════════════════════════════════════════════╤═════════════════╤═══════════════════╗
+║ Pattern(s)                                                             │ Maximum allowed │ Times it appeared ║
+╟────────────────────────────────────────────────────────────────────────┼─────────────────┼───────────────────╢
+║ [\\"Each child in a list should have a unique\\"]                          │ 2               │ 3                 ║
+╚════════════════════════════════════════════════════════════════════════╧═════════════════╧═══════════════════╝
+"
+`;
+
+exports[`validateLogs if "failIfUnknownLogsFound" is set to true and unknown warnings are found, then each unique message is only logged once 1`] = `
+"Unknown log messages are not allowed. Please use the configuration of this reporter to validate how many times the following messages can appear through \\"logValidations\\" or \\"exemptLogs\\":
+1) Warning: React.createFactory() is deprecated and will be removed in a future major release. Consider using JSX or use React.createElement() directly instead.
+2) Warning: toBeEmpty has been deprecated and will be removed in future updates. Please use instead toBeEmptyDOMElement for finding empty nodes in the DOM."
 `;

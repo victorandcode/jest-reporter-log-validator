@@ -1,8 +1,11 @@
+const stripAnsi = require('strip-ansi')
 const { validateLogs } = require("./validate-logs")
 
 // Serializes calls to a console so they can be used in snapshots
 function getCallsToConsoleFn(consoleMockObj) {
-  return consoleMockObj.mock.calls.join("\n")
+  return consoleMockObj.mock.calls.map((params) => {
+    return params.map(param => stripAnsi(param))
+  }).join("\n")
 }
 
 function getConfig(overrides) {
