@@ -33,7 +33,6 @@ function validateLogs(logsValidationsConfig, logMessages) {
     }
 
   } catch (err) {
-    console.error("There was an error while processing log messages", err)
     throw err
   }
 }
