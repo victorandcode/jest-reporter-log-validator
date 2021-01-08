@@ -112,6 +112,16 @@ describe("validateLogs", () => {
     expect(getCallsToConsoleFn(console.log)).toMatchSnapshot()
   })
 
+  it("if \"failIfUnknownLogsFound\" is set to true and unknown warnings are found, then each unique message is only logged once", () => {
+    const logs = [ 
+      "Warning: React.createFactory() is deprecated and will be removed in a future major release. Consider using JSX or use React.createElement() directly instead.",
+      "Warning: React.createFactory() is deprecated and will be removed in a future major release. Consider using JSX or use React.createElement() directly instead.",
+      "Warning: toBeEmpty has been deprecated and will be removed in future updates. Please use instead toBeEmptyDOMElement for finding empty nodes in the DOM."
+    ]
+    expect(() => { validateLogs(getConfig({ failIfUnknownLogsFound: true }), logs) }).toThrow()
+    expect(getCallsToConsoleFn(console.log)).toMatchSnapshot()
+  })
+
   it("succeeds if \"failIfUnknownLogsFound\" is true and warning is inside \"exemptLogs\"", () => {
     const config = getConfig({
       failIfUnknownLogsFound: true,

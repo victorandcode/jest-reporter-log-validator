@@ -100,7 +100,7 @@ function printOutdatedLogValidations(logValidations, outdatedLogValidationsIndex
 }
 
 function findUnknownLogMessages(logValidations, exemptLogs, logMessages) {
-  const unknownLogMessages = []
+  const unknownLogMessages = new Set([])
   for (const message of logMessages) {
     let hasMatchingPattern = false
     // Check if it has limit
@@ -119,11 +119,11 @@ function findUnknownLogMessages(logValidations, exemptLogs, logMessages) {
         }
       }
       if (!hasNoLimit) {
-        unknownLogMessages.push(message)
+        unknownLogMessages.add(message)
       }
     }
   }
-  return unknownLogMessages
+  return Array.from(unknownLogMessages)
 }
 
 function printUnknownLogMessages(unknownLogMessages) {
