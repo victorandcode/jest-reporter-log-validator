@@ -21,7 +21,10 @@ class JestReporterLogValidator {
   getLastError() {
     try {
       const config = getConfiguration(process.cwd(), this._options)
-      validateLogs(config, this._logMessages)
+      const validationsSuccessful = validateLogs(config, this._logMessages)
+      if (!validationsSuccessful) {
+        return new Error("Errors found while running validations")
+      }
     } catch (ex) {
       return ex
     }
@@ -29,4 +32,3 @@ class JestReporterLogValidator {
 }
 
 module.exports = JestReporterLogValidator;
-

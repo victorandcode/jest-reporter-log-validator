@@ -43,7 +43,7 @@ describe("validateLogs", () => {
       'Warning: Each child in a list should have a unique "key" prop',
       'Warning: Each child in a list should have a unique "key" prop',
     ]
-    expect(() => validateLogs(getConfig(), logs)).toThrow(new Error("Error while checking log validations. See above for detailed report."))
+    expect(validateLogs(getConfig(), logs)).toBe(false)
     expect(getCallsToConsoleFn(console.log)).toMatchSnapshot()
   })
 
@@ -53,7 +53,7 @@ describe("validateLogs", () => {
       "`wait` has been deprecated and replaced by `waitFor` instead.",
       'Warning: Each child in a list should have a unique "key" prop',
     ]
-    expect(() => validateLogs(getConfig(), logs)).not.toThrow()
+    expect(validateLogs(getConfig(), logs)).toBe(true)
   })
 
   it("succeeds if log message doesn't match all validation patterns", () => {
@@ -61,7 +61,7 @@ describe("validateLogs", () => {
       'Warning: Each child in a list should have a unique "key" prop',
       'Warning: Each child in a list should have a unique "key" prop',
     ]
-    expect(() => validateLogs(getConfig({
+    expect(validateLogs(getConfig({
       "logValidations": [
         {
           "patterns": [
@@ -72,7 +72,7 @@ describe("validateLogs", () => {
           "max": 0
         },
       ],
-    }), logs)).not.toThrow()
+    }), logs)).toBe(true)
   })
 
   it("fails if failIfLogValidationsOutdated is set to true and log max has decrased", () => {
@@ -80,7 +80,7 @@ describe("validateLogs", () => {
       'Warning: Each child in a list should have a unique "key" prop',
       "`wait` has been deprecated and replaced by `waitFor` instead.",
     ]
-    expect(() => validateLogs(getConfig({ failIfLogValidationsOutdated: true }), logs)).toThrow(new Error("Log validations are outdated. See above for detailed report."))
+    expect(validateLogs(getConfig({ failIfLogValidationsOutdated: true }), logs)).toBe(false)
     expect(getCallsToConsoleFn(console.log)).toMatchSnapshot()
   })
 
@@ -99,7 +99,7 @@ describe("validateLogs", () => {
       'Warning: Each child in a list should have a unique "key" prop',
       "`wait` has been deprecated and replaced by `waitFor` instead.",
     ]
-    expect(() => { validateLogs(invalidConfig, logs) }).toThrow()
+    expect(validateLogs(invalidConfig, logs)).toBe(false)
   })
 
   it("fails if \"failIfUnknownLogsFound\" is set to true and unknown warning is found", () => {
@@ -108,7 +108,7 @@ describe("validateLogs", () => {
       // The following warning does not exist in the configuration
       "Warning: React.createFactory() is deprecated and will be removed in a future major release. Consider using JSX or use React.createElement() directly instead.",
     ]
-    expect(() => { validateLogs(getConfig({ failIfUnknownLogsFound: true }), logs) }).toThrow(new Error("Unknown log messages aren't allowed. See above for more details."))
+    expect(validateLogs(getConfig({ failIfUnknownLogsFound: true }), logs)).toBe(false)
     expect(getCallsToConsoleFn(console.log)).toMatchSnapshot()
   })
 
@@ -118,7 +118,7 @@ describe("validateLogs", () => {
       "Warning: React.createFactory() is deprecated and will be removed in a future major release. Consider using JSX or use React.createElement() directly instead.",
       "Warning: toBeEmpty has been deprecated and will be removed in future updates. Please use instead toBeEmptyDOMElement for finding empty nodes in the DOM."
     ]
-    expect(() => { validateLogs(getConfig({ failIfUnknownLogsFound: true }), logs) }).toThrow()
+    expect(validateLogs(getConfig({ failIfUnknownLogsFound: true }), logs)).toBe(false)
     expect(getCallsToConsoleFn(console.log)).toMatchSnapshot()
   })
 
@@ -134,6 +134,6 @@ describe("validateLogs", () => {
     const logs = [
       "Error: Uncaught [TypeError: Cannot read property 'then' of undefined]",
     ]
-    expect(() => { validateLogs(config, logs) }).not.toThrow()
+    expect(validateLogs(config, logs)).toBe(true)
   })
 })

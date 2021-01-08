@@ -2,39 +2,36 @@ const { printTitle, printOrderedListItem, printTable, dangerText, successText } 
 const { matchesPatterns } = require("./utils")
 
 function validateLogs(logsValidationsConfig, logMessages) {
-  try {
-    const { logValidations } = logsValidationsConfig
+  const { logValidations } = logsValidationsConfig
+  let success = true
 
-    // Check for max limit exceeded
-    const { failedValidationsIndexes, currentLogMessagesCount } = processLogValidations(logValidations, logMessages)
-    if (failedValidationsIndexes.length) {
-      printMaxLimitExceeded(logValidations, failedValidationsIndexes, currentLogMessagesCount)
-      throw new Error("Error while checking log validations. See above for detailed report.")
-    }
-    
-    // Check for outdated log validations
-    const { failIfLogValidationsOutdated = false } = logsValidationsConfig
-    if (failIfLogValidationsOutdated) {
-      const outdatedLogValidationsIndexes = findOutdatedLogValidations(logValidations, currentLogMessagesCount)
-      if (outdatedLogValidationsIndexes.length) {
-        printOutdatedLogValidations(logValidations, outdatedLogValidationsIndexes, currentLogMessagesCount)
-        throw new Error("Log validations are outdated. See above for detailed report.")
-      }
-    }
-
-    // Validate unknown log messages
-    const { failIfUnknownLogsFound = false, exemptLogs = [] } = logsValidationsConfig
-    if (failIfUnknownLogsFound) {
-      const unknownLogMessages = findUnknownLogMessages(logValidations, exemptLogs, logMessages)
-      if (unknownLogMessages.length) {
-        printUnknownLogMessages(unknownLogMessages)
-        throw new Error("Unknown log messages aren't allowed. See above for more details.")
-      }
-    }
-
-  } catch (err) {
-    throw err
+  // Check for max limit exceeded
+  const { failedValidationsIndexes, currentLogMessagesCount } = processLogValidations(logValidations, logMessages)
+  if (failedValidationsIndexes.length) {
+    printMaxLimitExceeded(logValidations, failedValidationsIndexes, currentLogMessagesCount)
+    success = false
   }
+  
+  // Check for outdated log validations
+  const { failIfLogValidationsOutdated = false } = logsValidationsConfig
+  if (failIfLogValidationsOutdated) {
+    const outdatedLogValidationsIndexes = findOutdatedLogValidations(logValidations, currentLogMessagesCount)
+    if (outdatedLogValidationsIndexes.length) {
+      printOutdatedLogValidations(logValidations, outdatedLogValidationsIndexes, currentLogMessagesCount)
+      success = false
+    }
+  }
+
+  // Validate unknown log messages
+  const { failIfUnknownLogsFound = false, exemptLogs = [] } = logsValidationsConfig
+  if (failIfUnknownLogsFound) {
+    const unknownLogMessages = findUnknownLogMessages(logValidations, exemptLogs, logMessages)
+    if (unknownLogMessages.length) {
+      printUnknownLogMessages(unknownLogMessages)
+      success = false
+    }
+  }
+  return success
 }
 
 function processLogValidations(logValidations, logMessages) {
