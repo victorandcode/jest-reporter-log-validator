@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest src/",
     "test:watch": "jest src/ --watch",
-    "prepublishOnly": "npm run test && yarn run release",
+    "prepublishOnly": "npm run test",
     "release": "standard-version"
   },
   "repository": {
