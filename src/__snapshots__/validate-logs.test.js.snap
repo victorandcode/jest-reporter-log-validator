@@ -30,3 +30,8 @@ exports[`validateLogs if "failIfUnknownLogsFound" is set to true and unknown war
 1) Warning: React.createFactory() is deprecated and will be removed in a future major release. Consider using JSX or use React.createElement() directly instead.
 2) Warning: toBeEmpty has been deprecated and will be removed in future updates. Please use instead toBeEmptyDOMElement for finding empty nodes in the DOM."
 `;
+
+exports[`validateLogs throws if schema doesn't have the correct structure 1`] = `
+"The provided configuration is invalid. See below for more details:
+1) logValidations[0].max is a required field"
+`;

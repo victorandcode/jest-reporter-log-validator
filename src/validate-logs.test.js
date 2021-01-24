@@ -84,9 +84,9 @@ describe("validateLogs", () => {
     expect(getCallsToConsoleFn(console.log)).toMatchSnapshot()
   })
 
-  it.skip("throws if schema doesn't have the correct structure", () => {
+  it("throws if schema doesn't have the correct structure", () => {
     const invalidConfig = {
-      "logsWithValidations": [
+      "logValidations": [
         {
           "patterns": [
             "Each child in a list should have a unique"
@@ -95,11 +95,8 @@ describe("validateLogs", () => {
         }
       ]
     }
-    const logs = [ 
-      'Warning: Each child in a list should have a unique "key" prop',
-      "`wait` has been deprecated and replaced by `waitFor` instead.",
-    ]
-    expect(validateLogs(invalidConfig, logs)).toBe(false)
+    expect(() => validateLogs(invalidConfig, [])).toThrowError("Invalid configuration")
+    expect(getCallsToConsoleFn(console.log)).toMatchSnapshot()
   })
 
   it("fails if \"failIfUnknownLogsFound\" is set to true and unknown warning is found", () => {
