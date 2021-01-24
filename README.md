@@ -56,7 +56,7 @@ If you're using create-react-app (which doesn't yet support `jest.config.json`),
 | Option name | Type | Description | Default value |
 |----|----|----|----|
 |`logValidations`|`Array<{"patterns": Array<string>,"max": number}>`|Allows you to add a maximum to the number of times a certain log message can appear in your tests. For one element on this array to match a log message, all strings in the `patterns` attribute must match.|[]|
-|`failIfLogRestrictionsOutdated`|`boolean`|If the reporter finds that the max you defined in `logValidations` for some message can be lower, setting this flag to true will make the reporter throw an error. **This is enabled by default so you can progressively lower the number of messages generated in your tests.**|true|
+|`failIfLogValidationsOutdated`|`boolean`|If the reporter finds that the max you defined in `logValidations` for some message can be lower, setting this flag to true will make the reporter throw an error. **This is enabled by default so you can progressively lower the number of messages generated in your tests.**|true|
 |`failIfUnknownLogsFound`|`boolean`|If a log message which isn't defined in `logValidations` or `exemptLogs` is found, the reporter will throw an error. **Use this when you have limited all possible logs in your tests and want to avoid new ones from being generated**|false|
 |`exemptLogs`|`Array<{"patterns": Array<string>}>`}>|Defines a list of messages which don't have a maximum number of times they can appear and won't generate an error if `failIfUnknownLogsFound` is set to true. **Use this if there are warnings that you cannot avoid at the moment or are flaky, and you can't know the exact number for sure.**|[]|
 
@@ -80,7 +80,7 @@ If you're using create-react-app (which doesn't yet support `jest.config.json`),
     },
   ],
   "failIfUnknownLogsFound": false,
-  "failIfLogRestrictionsOutdated": true
+  "failIfLogValidationsOutdated": true
 }
 ```
 
@@ -156,7 +156,7 @@ The first recommendation here is to add all known warnings to the `logValidation
     }
   ],
   "failIfUnknownLogsFound": true,
-  "failIfLogRestrictionsOutdated": true
+  "failIfLogValidationsOutdated": true
 }
 ```
 
@@ -165,7 +165,7 @@ The recommendation here is to be as strict as possible.
 ```
 {
   "failIfUnknownLogsFound": true,
-  "failIfLogRestrictionsOutdated": true
+  "failIfLogValidationsOutdated": true
 }
 ```
 
@@ -184,6 +184,6 @@ Add the messages in question to the `logValidations` config and set the rest of 
     }
     // Other log messages here
   ],
-  "failIfLogRestrictionsOutdated": true
+  "failIfLogValidationsOutdated": true
 }
 ```
