@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.3](https://github.com/victorandcode/jest-reporter-log-validator/compare/v0.1.2...v0.1.3) (2021-01-24)
+
+
+### Features
+
+* add module to validate config schema ([e27e467](https://github.com/victorandcode/jest-reporter-log-validator/commit/e27e467169357d962c2dde59cecd64447f61aee3))
+* run config schema validation when running the reporter ([0c96538](https://github.com/victorandcode/jest-reporter-log-validator/commit/0c9653839b385cf34fc51b6845a958301874e6e7))
+
 ### [0.1.2](https://github.com/victorandcode/jest-reporter-log-validator/compare/v0.1.1...v0.1.2) (2021-01-09)
 
 ### 0.1.1 (2021-01-09)
