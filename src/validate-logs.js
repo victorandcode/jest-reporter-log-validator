@@ -1,7 +1,15 @@
 const { printTitle, printOrderedListItem, printTable, dangerText, successText } = require("./stdout")
 const { matchesPatterns } = require("./utils")
+const { schemaIsValid } = require("./schema")
 
 function validateLogs(logsValidationsConfig, logMessages) {
+  // Validate configuration
+  const { valid, errors } = schemaIsValid(logsValidationsConfig)
+  if (!valid) {
+    printInvalidConfig(errors)
+    throw Error("Invalid configuration")
+  }
+
   const { logValidations } = logsValidationsConfig
   let success = true
 
@@ -32,6 +40,13 @@ function validateLogs(logsValidationsConfig, logMessages) {
     }
   }
   return success
+}
+
+function printInvalidConfig(errors) {
+  printTitle("The provided configuration is invalid. See below for more details:")
+  errors.forEach((error, index) => {
+    printOrderedListItem(index + 1, error)
+  })
 }
 
 function processLogValidations(logValidations, logMessages) {
