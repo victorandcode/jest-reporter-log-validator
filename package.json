@@ -1,6 +1,6 @@
 {
   "name": "jest-reporter-log-validator",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Jest reporter to validate log messages produced by tests",
   "main": "src/reporter.js",
   "scripts": {
