@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.6](https://github.com/victorandcode/jest-reporter-log-validator/compare/v0.1.5...v0.1.6) (2021-10-08)
+
+
+### Features
+
+* prevent reporter from failing if in verbose mode ([daaabfa](https://github.com/victorandcode/jest-reporter-log-validator/commit/daaabfa1b5859d7d437d0513079a1d742abf6158))
+
 ### [0.1.5](https://github.com/victorandcode/jest-reporter-log-validator/compare/v0.1.4...v0.1.5) (2021-03-09)
 
 ### [0.1.3](https://github.com/victorandcode/jest-reporter-log-validator/compare/v0.1.2...v0.1.3) (2021-01-24)
