@@ -1,10 +1,14 @@
-const { validateLogs } = require('./validate-logs')
+const { validateLogs } = require("./validate-logs")
 const { getConfiguration } = require("./config")
 
 class JestReporterLogValidator {
   constructor(globalConfig, options) {
     if (globalConfig.verbose === true) {
-      throw Error("Invalid configuration. Verbose must be false when using jest-reporter-log-validator. Otherwise, console messages won't be available to the reporter.")
+      /**
+       * If we're in verbose mode, the log messages aren't available for reportes
+       */
+      this._logs_unavailable = true
+      return
     }
     this._options = options
     this._logMessages = []
@@ -19,6 +23,10 @@ class JestReporterLogValidator {
   }
 
   getLastError() {
+    if (this._logs_unavailable) {
+      return
+    }
+
     try {
       const config = getConfiguration(process.cwd(), this._options)
       const validationsSuccessful = validateLogs(config, this._logMessages)
@@ -31,4 +39,4 @@ class JestReporterLogValidator {
   }
 }
 
-module.exports = JestReporterLogValidator;
+module.exports = JestReporterLogValidator
