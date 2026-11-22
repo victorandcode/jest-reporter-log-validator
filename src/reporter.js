@@ -3,27 +3,29 @@ const { getConfiguration } = require("./config")
 
 class JestReporterLogValidator {
   constructor(globalConfig, options) {
-    if (globalConfig.verbose === true) {
-      /**
-       * If we're in verbose mode, the log messages aren't available for reportes
-       */
-      this._logs_unavailable = true
-      return
-    }
     this._options = options
     this._logMessages = []
+    this._verbose = globalConfig.verbose === true
+    this._consoleMessagesAvailable = false
   }
 
   onTestResult(_, testResult) {
-    if (testResult.console) {
-      for (const logObj of testResult.console) {
-        this._logMessages.push(logObj.message)
-      }
+    if (!testResult.console) {
+      return
+    }
+    this._consoleMessagesAvailable = true
+    for (const logObj of testResult.console) {
+      this._logMessages.push(logObj.message)
     }
   }
 
   getLastError() {
-    if (this._logs_unavailable) {
+    /**
+     * Older Jest versions don't provide console messages to reporters in
+     * verbose mode. Newer versions do, so only skip validation when verbose
+     * mode is enabled and no console output was provided.
+     */
+    if (this._verbose && !this._consoleMessagesAvailable) {
       return
     }
 
