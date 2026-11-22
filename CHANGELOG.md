@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+All notable changes to this project will be documented in this file. Releases are managed with [release-please](https://github.com/googleapis/release-please).
 
 ### [0.1.6](https://github.com/victorandcode/jest-reporter-log-validator/compare/v0.1.5...v0.1.6) (2021-10-08)
 

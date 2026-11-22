@@ -23,9 +23,12 @@ beforeEach(() => {
 describe("JestReporterLogValidator", () => {
   it("validates console messages in verbose mode when they are available", () => {
     const reporter = createReporter({ verbose: true })
-    reporter.onTestResult({}, {
-      console: [{ message: "first warning" }, { message: "second warning" }],
-    })
+    reporter.onTestResult(
+      {},
+      {
+        console: [{ message: "first warning" }, { message: "second warning" }],
+      },
+    )
 
     expect(reporter.getLastError()).toBeUndefined()
     expect(validateLogs).toHaveBeenCalledWith({}, ["first warning", "second warning"])

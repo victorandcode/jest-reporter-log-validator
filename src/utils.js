@@ -11,5 +11,4 @@ function matchesPatterns(logMessage, patterns) {
   return matchingPatterns === 0 ? false : patterns.length === matchingPatterns
 }
 
-
 module.exports = { matchesPatterns }

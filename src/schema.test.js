@@ -1,5 +1,4 @@
-const { italic } = require('chalk')
-const { schemaIsValid } = require('./schema')
+const { schemaIsValid } = require("./schema")
 
 beforeEach(() => {
   console.error = jest.fn()
@@ -10,11 +9,11 @@ describe("schemaIsValid", () => {
     const objToValidate = {
       logValidations: [
         {
-          max: 10
+          max: 10,
         },
         {
-          patterns: []
-        }
+          patterns: [],
+        },
       ],
     }
     const { valid, errors } = schemaIsValid(objToValidate)

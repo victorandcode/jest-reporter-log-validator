@@ -1,33 +1,36 @@
-const stripAnsi = require('strip-ansi')
+const ANSI_ESCAPE_PATTERN = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g")
+
+function stripAnsi(value) {
+  return String(value).replace(ANSI_ESCAPE_PATTERN, "")
+}
+
 const { validateLogs } = require("./validate-logs")
 
 // Serializes calls to a console so they can be used in snapshots
 function getCallsToConsoleFn(consoleMockObj) {
-  return consoleMockObj.mock.calls.map((params) => {
-    return params.map(param => stripAnsi(param))
-  }).join("\n")
+  return consoleMockObj.mock.calls
+    .map((params) => {
+      return params.map((param) => stripAnsi(param))
+    })
+    .join("\n")
 }
 
 function getConfig(overrides) {
   return {
-    "logValidations": [
+    logValidations: [
       {
-        "patterns": [
-          "Each child in a list should have a unique"
-        ],
-        "max": 2
+        patterns: ["Each child in a list should have a unique"],
+        max: 2,
       },
       {
-        "patterns": [
-          "`wait` has been deprecated and replaced by `waitFor` instead."
-        ],
-        "max": 1
-      }
+        patterns: ["`wait` has been deprecated and replaced by `waitFor` instead."],
+        max: 1,
+      },
     ],
-    "failIfLogValidationsOutdated": false,
-    "failIfUnknownLogsFound": false,
-    "exemptLogs": [],
-    ...overrides
+    failIfLogValidationsOutdated: false,
+    failIfUnknownLogsFound: false,
+    exemptLogs: [],
+    ...overrides,
   }
 }
 
@@ -44,7 +47,10 @@ describe("validateLogs", () => {
       'Warning: Each child in a list should have a unique "key" prop',
     ]
     expect(validateLogs(getConfig(), logs)).toBe(false)
-    expect(getCallsToConsoleFn(console.log)).toMatchSnapshot()
+    const output = getCallsToConsoleFn(console.log)
+    expect(output).toContain("The following log validations failed")
+    expect(output).toContain('["Each child in a list should have a unique"]')
+    expect(output).toContain("│ 2               │ 3")
   })
 
   it("succeeds if log message appears less times than allowed", () => {
@@ -61,76 +67,84 @@ describe("validateLogs", () => {
       'Warning: Each child in a list should have a unique "key" prop',
       'Warning: Each child in a list should have a unique "key" prop',
     ]
-    expect(validateLogs(getConfig({
-      "logValidations": [
-        {
-          "patterns": [
-            "Warning: Each child in a list should have a unique",
-            // The following string does not appear in the messages
-            "\"name\" prop"
+    expect(
+      validateLogs(
+        getConfig({
+          logValidations: [
+            {
+              patterns: [
+                "Warning: Each child in a list should have a unique",
+                // The following string does not appear in the messages
+                '"name" prop',
+              ],
+              max: 0,
+            },
           ],
-          "max": 0
-        },
-      ],
-    }), logs)).toBe(true)
+        }),
+        logs,
+      ),
+    ).toBe(true)
   })
 
   it("fails if failIfLogValidationsOutdated is set to true and log max has decrased", () => {
-    const logs = [ 
+    const logs = [
       'Warning: Each child in a list should have a unique "key" prop',
       "`wait` has been deprecated and replaced by `waitFor` instead.",
     ]
     expect(validateLogs(getConfig({ failIfLogValidationsOutdated: true }), logs)).toBe(false)
-    expect(getCallsToConsoleFn(console.log)).toMatchSnapshot()
+    const output = getCallsToConsoleFn(console.log)
+    expect(output).toContain("Some warnings have decreased")
+    expect(output).toContain('["Each child in a list should have a unique"]')
+    expect(output).toContain("│ 2               │ 1")
   })
 
   it("throws if schema doesn't have the correct structure", () => {
     const invalidConfig = {
-      "logValidations": [
+      logValidations: [
         {
-          "patterns": [
-            "Each child in a list should have a unique"
-          ],
+          patterns: ["Each child in a list should have a unique"],
           // max is missing
-        }
-      ]
+        },
+      ],
     }
-    expect(() => validateLogs(invalidConfig, [])).toThrowError("Invalid configuration")
-    expect(getCallsToConsoleFn(console.log)).toMatchSnapshot()
+    expect(() => validateLogs(invalidConfig, [])).toThrow("Invalid configuration")
+    expect(getCallsToConsoleFn(console.log)).toContain("logValidations[0].max is a required field")
   })
 
-  it("fails if \"failIfUnknownLogsFound\" is set to true and unknown warning is found", () => {
-    const logs = [ 
+  it('fails if "failIfUnknownLogsFound" is set to true and unknown warning is found', () => {
+    const logs = [
       'Warning: Each child in a list should have a unique "key" prop',
       // The following warning does not exist in the configuration
       "Warning: React.createFactory() is deprecated and will be removed in a future major release. Consider using JSX or use React.createElement() directly instead.",
     ]
     expect(validateLogs(getConfig({ failIfUnknownLogsFound: true }), logs)).toBe(false)
-    expect(getCallsToConsoleFn(console.log)).toMatchSnapshot()
+    expect(getCallsToConsoleFn(console.log)).toContain(
+      "1) Warning: React.createFactory() is deprecated and will be removed in a future major release. Consider using JSX or use React.createElement() directly instead.",
+    )
   })
 
-  it("if \"failIfUnknownLogsFound\" is set to true and unknown warnings are found, then each unique message is only logged once", () => {
-    const logs = [ 
+  it('if "failIfUnknownLogsFound" is set to true and unknown warnings are found, then each unique message is only logged once', () => {
+    const logs = [
       "Warning: React.createFactory() is deprecated and will be removed in a future major release. Consider using JSX or use React.createElement() directly instead.",
       "Warning: React.createFactory() is deprecated and will be removed in a future major release. Consider using JSX or use React.createElement() directly instead.",
-      "Warning: toBeEmpty has been deprecated and will be removed in future updates. Please use instead toBeEmptyDOMElement for finding empty nodes in the DOM."
+      "Warning: toBeEmpty has been deprecated and will be removed in future updates. Please use instead toBeEmptyDOMElement for finding empty nodes in the DOM.",
     ]
     expect(validateLogs(getConfig({ failIfUnknownLogsFound: true }), logs)).toBe(false)
-    expect(getCallsToConsoleFn(console.log)).toMatchSnapshot()
+    const output = getCallsToConsoleFn(console.log)
+    expect(output).toContain("1) Warning: React.createFactory()")
+    expect(output).toContain("2) Warning: toBeEmpty has been deprecated")
   })
 
-  it("succeeds if \"failIfUnknownLogsFound\" is true and warning is inside \"exemptLogs\"", () => {
+  it('succeeds if "failIfUnknownLogsFound" is true and warning is inside "exemptLogs"', () => {
     const config = getConfig({
       failIfUnknownLogsFound: true,
       exemptLogs: [
         {
-          "patterns": ["Error: Uncaught [TypeError: Cannot read property 'then' of undefined]"]
-        }
+          patterns: ["Error: Uncaught [TypeError: Cannot read property 'then' of undefined]"],
+        },
       ],
     })
-    const logs = [
-      "Error: Uncaught [TypeError: Cannot read property 'then' of undefined]",
-    ]
+    const logs = ["Error: Uncaught [TypeError: Cannot read property 'then' of undefined]"]
     expect(validateLogs(config, logs)).toBe(true)
   })
 })

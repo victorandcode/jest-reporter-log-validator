@@ -2,17 +2,6 @@
   "name": "jest-reporter-log-validator",
   "version": "0.1.6",
   "description": "Jest reporter to validate log messages produced by tests",
-  "main": "src/reporter.js",
-  "scripts": {
-    "test": "jest src/",
-    "test:watch": "jest src/ --watch",
-    "prepublishOnly": "npm run test",
-    "release": "standard-version"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com/victorandcode/jest-reporter-log-validator.git"
-  },
   "keywords": [
     "jest",
     "unit-test",
@@ -21,18 +10,55 @@
   ],
   "author": "Victor Cordova",
   "license": "MIT",
+  "homepage": "https://github.com/victorandcode/jest-reporter-log-validator#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/victorandcode/jest-reporter-log-validator.git"
+  },
   "bugs": {
     "url": "https://github.com/victorandcode/jest-reporter-log-validator/issues"
   },
-  "homepage": "https://github.com/victorandcode/jest-reporter-log-validator#readme",
-  "devDependencies": {
-    "jest": "^26.6.3",
-    "standard-version": "^9.3.0",
-    "strip-ansi": "^6.0.0"
+  "main": "src/reporter.js",
+  "types": "src/reporter.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/reporter.d.ts",
+      "require": "./src/reporter.js",
+      "default": "./src/reporter.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src/config.js",
+    "src/reporter.d.ts",
+    "src/reporter.js",
+    "src/schema.js",
+    "src/stdout.js",
+    "src/utils.js",
+    "src/validate-logs.js"
+  ],
+  "engines": {
+    "node": ">=18.14.0"
+  },
+  "peerDependencies": {
+    "jest": ">=26 <31"
   },
   "dependencies": {
-    "chalk": "^4.1.1",
-    "table": "^6.0.7",
-    "yup": "^0.32.9"
-  }
+    "table": "^6.10.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.6.8",
+    "jest": "^30.5.2"
+  },
+  "scripts": {
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "lint": "biome lint .",
+    "prepublishOnly": "npm run check && npm test",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "packageManager": "pnpm@12.21.0"
 }

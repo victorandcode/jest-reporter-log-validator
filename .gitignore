@@ -1,17 +1,17 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Dependencies
+node_modules/
+.pnpm-store/
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
+# Test output
+coverage/
 
-# testing
-/coverage
+# Build output
+build/
 
-# production
-/build
+# Package artifacts
+*.tgz
 
-# misc
+# Misc
 .DS_Store
 .env.local
 .env.development.local
@@ -19,5 +19,6 @@
 .env.production.local
 
 npm-debug.log*
+pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
